@@ -162,8 +162,9 @@ class _AddRateState extends State<AddRate> {
                                             imageError = false;
                                           });
                                           await _categorie.SetData(
-                                              nameController.text,
                                               ProductController.text,
+                                              nameController.text,
+
                                               rate
                                           );
                                           Navigator.pop(context);
@@ -196,8 +197,8 @@ class _AddRateState extends State<AddRate> {
 
 
                                                     await _categorie.update(widget.document,
+                                                        ProductController.text,
                                                       nameController.text ,
-                                                      ProductController.text,
                                                       rate
 
 

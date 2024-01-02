@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/View/History/Historique.dart';
+import 'package:dashboard/View/History/rapport_production_component.dart';
 import 'package:dashboard/View/History/task_filter_component.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +23,8 @@ class _DoneTaskScreenState extends State<DoneTaskScreen> {
   List<String> product = [];
   String? selectedEmploye;
   String? selectedProduct;
+  bool rapport = false;
+  Map<String,int> rapportList ={};
   Historique _historique = new Historique();
   @override
   Widget build(BuildContext context) {
@@ -177,6 +180,9 @@ class _DoneTaskScreenState extends State<DoneTaskScreen> {
                         ),
                       ),
                     ),
+                  if(index == 0)
+                    RapportComponent(raport: rapport, rapportList: rapportList),
+
                   if (showDateHeader)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -256,7 +262,13 @@ class _DoneTaskScreenState extends State<DoneTaskScreen> {
 
         }
 
-
+      List<String> sensitiveWords = ["sensitive", "bad","fuck"];
+      String censorText(String text, List<String> sensitiveWords) {
+        for (var word in sensitiveWords) {
+          text = text.replaceAll(RegExp(r"\b" + word + r"\b"), '*' * word.length);
+        }
+        return text;
+      }
         // Extract quantity and date
         for (QueryDocumentSnapshot doc in snapshot.docs) {
           employe.contains(doc['UserName'])?null:employe.add(doc['UserName']);
@@ -277,13 +289,19 @@ class _DoneTaskScreenState extends State<DoneTaskScreen> {
             Map<String, dynamic> combinedData = {
               'UserName': doc['UserName'],
               'ProductName': doc['ProductName'],
-              'Commentaire': doc['Commentaire'],
+              'Commentaire': censorText(doc['Commentaire'], sensitiveWords),
               'date': date,
 
 
 
             };
             result.add(combinedData);
+            if(rapportList.containsKey(doc['ProductName'])){
+              rapportList[doc['ProductName']] = rapportList[doc['ProductName']]! + 1;
+            }
+            else{
+              rapportList[doc['ProductName']] = 1;
+            }
           }
           else{
             if((firstDate.isBefore(date) ||  (firstDate.year == date.year && firstDate.month == date. month && firstDate.day == date.day))
@@ -298,6 +316,12 @@ class _DoneTaskScreenState extends State<DoneTaskScreen> {
 
               };
               result.add(combinedData);
+              if(rapportList.containsKey(doc['ProductName'])){
+                rapportList[doc['ProductName']] = rapportList[doc['ProductName']]! + 1;
+              }
+              else{
+                rapportList[doc['ProductName']] = 1;
+              }
             }
           }
 

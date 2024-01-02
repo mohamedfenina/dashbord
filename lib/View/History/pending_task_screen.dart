@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/View/History/Historique.dart';
+import 'package:dashboard/View/History/rapport_production_component.dart';
 import 'package:dashboard/View/History/task_filter_component.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,8 @@ class _PendingTaskScreenState extends State<PendingTaskScreen> {
   List<String> product = [];
   String? selectedEmploye;
   String? selectedProduct;
+  bool rapport = false;
+  Map<String,double> rapportList ={};
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +175,8 @@ class _PendingTaskScreenState extends State<PendingTaskScreen> {
                         ),
                       ),
                     ),
+                  if(index == 0)
+                    RapportComponent(raport: rapport, rapportList: rapportList),
                   if (showDateHeader)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -263,7 +268,8 @@ class _PendingTaskScreenState extends State<PendingTaskScreen> {
 
 
 
-
+      Map<String,int> rpl ={};
+      Map<String, int> rapport = {};
       // Extract quantity and date
       for (QueryDocumentSnapshot doc in snapshot.docs) {
         employe.contains(doc['UserName'])?null:employe.add(doc['UserName']);
@@ -291,6 +297,15 @@ class _PendingTaskScreenState extends State<PendingTaskScreen> {
 
           };
           result.add(combinedData);
+          if(rapport.containsKey(doc['ProductName'])){
+            rapport[doc['ProductName']] = rapport[doc['ProductName']]! + doc['Rate'] as int;
+            rpl[doc['ProductName']] = rpl[doc['ProductName']]! + 1;
+          }
+          else{
+            rapport[doc['ProductName']] = doc['Rate'];
+            rpl[doc['ProductName']] = 1;
+
+          }
         }
         else{
           if((firstDate.isBefore(date) ||  (firstDate.year == date.year && firstDate.month == date. month && firstDate.day == date.day))
@@ -305,6 +320,14 @@ class _PendingTaskScreenState extends State<PendingTaskScreen> {
 
             };
             result.add(combinedData);
+            if(rapport.containsKey(doc['ProductName'])){
+              rapport[doc['ProductName']] = rapport[doc['ProductName']]! +  doc['Rate'] as int;
+              rpl[doc['ProductName']] = rpl[doc['ProductName']]! + 1;
+            }
+            else{
+              rapport[doc['ProductName']] = doc['Rate'];
+              rpl[doc['ProductName']] = 1;
+            }
           }
         }
 
@@ -312,6 +335,16 @@ class _PendingTaskScreenState extends State<PendingTaskScreen> {
         // Build a combined map
 
       }
+
+
+
+      rapport.forEach((key, value) {
+        if (rpl.containsKey(key) && rpl[key] != 0) {
+          rapportList[key] = value / rpl[key]! as double;
+        } else {
+          rapportList[key] = value as double; // Handle division by zero or missing key
+        }
+      });
       //}
       print(result);
 

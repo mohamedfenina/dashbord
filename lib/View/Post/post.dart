@@ -61,7 +61,10 @@ class PostScreen extends StatelessWidget {
                       String documentId = document.id;
                       String user = document['UserName'];
                       String produit = document['ProductName'];
-                      String commentaire = document['Commentaire'];
+                      List<String> sensitiveWords = ["sensitive", "bad","fuck"];
+                      String commentaire = censorText(document['Commentaire'],sensitiveWords);
+
+
 
 
 
@@ -141,4 +144,10 @@ class PostScreen extends StatelessWidget {
       ),
     );
   }
+   String censorText(String text, List<String> sensitiveWords) {
+     for (var word in sensitiveWords) {
+       text = text.replaceAll(RegExp(r"\b" + word + r"\b"), '*' * word.length);
+     }
+     return text;
+   }
 }
